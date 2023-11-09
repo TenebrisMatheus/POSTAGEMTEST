@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing: border-box;
+        }
+        h1{
+            padding: 10px;
+            text-align: center;
+            background-color: blueviolet;
+            color:white;
+        }
+        .video-single{
+            border-bottom: 1px dashed #ccc;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .video-title{
+            cursor: pointer;
+        }
+        .video-single video{
+            width:100%;
+        }
+    </style>
+</head>
+<body>
+ <div class="container">
+    <h1>Plataforma de video</h1>
+    <div class="container-videos-geral">
+        <!----aqui vai ser inserido conteudo dinamico-->
+    </div>
+    <form id="videoForm">
+        <label for="videoName">Nome do vídeo:</label>
+        <input type="text" id="videoName" name="videoName" required>
+
+        <label for="videoUrl">URL do vídeo:</label>
+        <input type="url" id="videoUrl" name="videoUrl" required>
+
+        <button type="button" onclick="enviarVideo()">Enviar Vídeo</button>
+    </form>
+ </div>
+
+
+ <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBB5YpfLsp9g2iqNcj1oGqpQ4-zq2ghVsM",
+      authDomain: "cadastro-411de.firebaseapp.com",
+      databaseURL: "https://cadastro-411de-default-rtdb.firebaseio.com",
+      projectId: "cadastro-411de",
+      storageBucket: "cadastro-411de.appspot.com",
+      messagingSenderId: "279976171170",
+      appId: "1:279976171170:web:caa77af161cfb3eca329fb",
+      measurementId: "G-KJ7JK4LDPP"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    async function fetchData(db){
+        const docsCol = collection(db, "videos");
+        const docSnap = await getDocs(docsCol);
+        const docList = docSnap.docs.map(doc => doc.data());
+        return docList;
+    }
+    window.enviarVideo = async function() {
+            const videoName = document.getElementById('videoName').value;
+            const videoUrl = document.getElementById('videoUrl').value;
+            const videosCollection = collection(db, 'videos');
+            await addDoc(videosCollection, {
+                nome: videoName,
+                url: videoUrl
+            });
+        }
+
+    // Correção da chamada da função
+ 
+       let videos = await fetchData(db);
+            let containerVideos = document.querySelector('.container-videos-geral');
+            containerVideos.innerHTML = ""; // Limpar a lista existente
+            for (let i = 0; i < videos.length; i++) {
+                containerVideos.innerHTML += `
+                    <div class="video-single">
+                        <div class="video-title">
+                            <h3>${videos[i].nome}</h3>
+                        </div>
+                        <div class="video-content">
+                            <video controls>
+                                <source src="${videos[i].url}" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>`;
+                }
+</script>
+
+    
+</body>
+</html>
